@@ -9,10 +9,10 @@ LDFLAGS = -lm
 
 PROG=$(BDIR)/mat
 
-_DEPS = vector.h
+_DEPS = vector.h matrix.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJS= main.o vector.o
+_OBJS= vector.o matrix.o main.o
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 .PHONY : run all dirs clean delete

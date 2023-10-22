@@ -1,2 +1,2 @@
-# TP1 Programmation avancée
-TP1 de programmation avancée - Make & Makefile
+# TP2 Programmation avancée
+TP2 de programmation avancée - Matrices
