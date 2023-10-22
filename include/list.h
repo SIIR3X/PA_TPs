@@ -1,128 +1,77 @@
 #pragma once
 
 #include <stdbool.h>
+#include "elmlist.h"
 
-#include "list_elm.h"
-
-/** @brief TA d'une liste d'entiers:
-  * + une tête de liste
-  * + une queue de liste
-  * + le nombre d'éléments
-  */
+/**************
+TYPES ABSTRAITS
+**************/
+/** @brief Le type d'un élément de liste :
+ * + `head` un *pointeur* sur le premier élément de la liste
+ * + `tail` un *pointeur* sur le dernier élément de la liste
+ * + `numelm` le nombre d'éléments rangés dans la liste
+ */
 typedef struct {
-	list_elm_t * head;
-	list_elm_t * tail;
-	int numelm;
+  elmlist_t * head;
+  elmlist_t * tail;
+  int numelm;
 } list_t;
-	
-/**
- * @brief L est-elle vide
- * 
- * @param L  :: la liste
- * @return true 
- * @return false 
- */
-bool empty_list(list_t * L );
 
-/**
- * @brief Créer une nouvelle liste vide
- * 
- * @return list_t* 
- */
+/***********************************
+DÉCLARATIONS DES FONCTIONS PUBLIQUES
+***********************************/
+
+/** @brief Créer une liste vide */
 list_t * new_list();
 
-/**
- * @brief Ajouter en tête de liste une nouvelle valeur entière
- * 
- * @param L :: la liste
- * @param v :: la valeur entière
+/** @brief Supprimer une liste signifie :
+ * (a) Soit `ptrF == NULL` et l'on veut supprimer **uniquement** la structure de liste
+ * (b) Soit `ptrF != NULL` et l'on veut supprimer la structure de liste _et_ les éléments qu'elle contient
+ * Les listes étant **génériques** et **homogènes**,
+ * on utilise alors le  _pointeur de fonction_ `ptrF` pour indiquer à `rmList`
+ * la fonction de suppression qui correspond aux données stockées dans la liste:
+ * + `rmInteger`
+ * + `rmDouble`
  */
-void cons(list_t * L, int v);
+void del_list ( list_t ** ptrL, void (*ptrF)());
 
-/**
- * @brief Insérer en queue de liste une nouvelle valeur entière
- * 
- * @param L :: la liste
- * @param v :: la valeur entière
- */
-void queue(list_t * L, int v);
+/** @brief Vérifie si la liste est vide ou pas */
+bool empty_list( list_t * L );
 
-/**
- * @brief Libérer la mémoire occupée par la liste
- * @remarks 
- *  - Le pointeur en argument lors de l'appel à cette fonction est mis à NULL par effet de bord
- *  - Toute la mémoire est libérée : la liste et les éléments de liste
- * 
- * @param ptrL :: l'adresse de l'adresse de la liste
- */
-void del_list(list_t ** ptrL);
+/** @brief Ajoute en tête de la liste un nouvel élément dont la donnée est `d` */
+void cons( list_t * L, void * d);
 
-/**
- * @brief Get the head object
- * 
- * @param L :: la liste
- * @return list_elm_t* 
- */
-list_elm_t * get_head(list_t * L);
+/** @brief Ajoute en queue de la liste un nouvel élément dont la donnée est `d` */
+void queue( list_t * L, void * d);
 
-/**
- * @brief Set the head object
- * 
- * @param L :: La liste
- * @param E :: La nouvelle tête
- */
-void set_head(list_t * L, list_elm_t * E);
+/** @brief Consulte/Modifie la tête de la liste */
+elmlist_t * get_head( list_t * L);
+void set_head( list_t * L, elmlist_t * E);
 
-/**
- * @brief Get the tail object
- * 
- * @param L :: La liste
- * @return list_elm_t* 
- */
-list_elm_t * get_tail(list_t * L);
+/** @brief Consulte/Modifie la queue de la liste */
+elmlist_t * get_tail( list_t * L);
+void set_head( list_t * L, elmlist_t * E);
 
-/**
- * @brief Set the tail object
- * 
- * @param L :: La liste
- * @param E :: La nouvelle queue de liste
- */
-void set_tail(list_t * L, list_elm_t * E);
+/** @brief Consulte/Incrémente/Décrémente le nombre d'éléments rangés dans la liste */
+int get_numelm( list_t * L);
+void incrnumelm( list_t * L);
+void decrnumelm( list_t * L);
 
-/**
- * @brief Get the numelm object
- * 
- * @param L :: La liste
- * @return int 
+/** @brief Visualiser les éléments de la liste L.
+ * Les listes étant **génériques** et **homogènes**,
+ * on utilise alors un  pointeur de fonction:
+ * + `ptrPrintI`
+ * + `ptrPrintD`
+ * qui permet de transmettre à `viewList`
+ * la fonction d'affichage qui correspond aux données stockées dans la liste :
+ * + `printInteger`
+ * + `printDouble`
  */
-int get_numelm(list_t * L);
+void view_list ( list_t * L, void (*ptrF)() );
 
-/**
- * @brief Set the numelm object
- * 
- * @param L :: La liste
- * @param v :: La nouvelle valeur
+/** @brief Insertion suivant l'ordre croissant indiqué par le _pointeur de fonction_  `ptrF`
+ * pointant sur la fonction de comparaison qui correspond aux données stockées dans la liste :
+ * + `intcmp`
+ * + `reelcmp`
  */
-void set_numelm(list_t * L, int v);
-
-/**
- * @brief Incrémenter de 1 numelm
- * 
- * @param L :: La liste
- */
-void plus_one(list_t * L);
-
-/**
- * @brief Insèrer l'entier v dans la liste L suivant l'ordre croissant
- * 
- * @param L :: La liste
- * @param v :: La valeur à insérer
- */
-void insert_ordered(list_t * L, int v);
-
-/**
- * @brief Visualiser les valeurs entières de la liste
- * 
- * @param L :: La liste
- */
-void view_list(list_t * L);
+void insert_ordered ( list_t * L, void * d, int(*ptrF_cmp)());

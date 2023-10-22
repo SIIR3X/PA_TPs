@@ -4,26 +4,24 @@ ODIR = obj
 SDIR = src
 
 CC = gcc
-# Le déboggage en toutes circonstances grâce à :: -D _DEBUG_
-# que l'on peutarêter à tout moment grâce à :: -U _DEBUG_
-CFLAGS = -Wall -I$(IDIR) -U _DEBUG_
-LFLAGS = -lm 
+CFLAGS = -g -Wall -std=c99 -I$(IDIR)
+LFLAGS = -lm
 
-PROG = $(BDIR)/form
+PROG = $(BDIR)/genlist
 
-_DEPS = list_elm.h list.h
+_DEPS = elmlist.h list.h outils.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJS = list_elm.o list.o main.o
+_OBJS= elmlist.o list.o main.o outils.o
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 .PHONY : run all dirs clean delete
 
-run : all
+run : $(PROG)
 	./$(PROG)
 
-all : dirs $(OBJS)
-	$(CC) -o $(PROG) $(OBJS) $(LFLAGS)
+$(PROG) : dirs $(OBJS)
+	$(CC) $(OBJS) -o $(PROG)
 
 dirs :
 	@mkdir -p $(ODIR)

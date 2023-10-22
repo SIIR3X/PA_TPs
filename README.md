@@ -1,2 +1,2 @@
-# TP4 Programmation avancée
-TP4 de programmation avancée - Liste simple d'entiers
+# TP5 Programmation avancée
+TP5 de programmation avancée - Listes simplement chaînées génériques
