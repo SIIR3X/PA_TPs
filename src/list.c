@@ -101,17 +101,19 @@ void queue(list_t * L, void * d){
   assert(L && d);
 
   elmlist_t * newElm = new_elmlist(d);
-  if (!newElm) return;
-  newElm->suc = NULL;
+  if (!newElm){
+    fprintf(stderr, "Queue : la création de elmlist_t d à échouée.\n");
+    return;
+  }
+  set_suc(newElm, NULL);
 
-  if (L->tail){
-    L->tail->suc = newElm;
+  if (empty_list(L)){
+    set_head(L, newElm);
   }
   else{
-    L->head = newElm;
+    set_suc(get_tail(L), newElm);
   }
-
-  L->tail = newElm;
+  set_tail(L, newElm);
 
   L->numelm++;
 }
@@ -125,17 +127,19 @@ void view_list (list_t * L, void(*ptrF)()){
 }
 
 void insert_ordered(list_t * L, void * d, int (*ptrF_cmp)()){
-  if (!L || !L->head || ptrF_cmp(L->head->datum, d) >= 0){
+  assert (L && d && ptrF_cmp);
+
+  if (empty_list(L) || ptrF_cmp(get_data(get_head(L)), d) >= 0){
     cons(L, d);
   }
-  else if (ptrF_cmp(L->tail->datum, d) <= 0) {
+  else if (ptrF_cmp(get_data(get_tail(L)), d) <= 0) {
     queue(L, d);
   }
   else{
-    elmlist_t * current = L->head;
+    elmlist_t * current = get_head(L);
 
-    while(current->suc && ptrF_cmp(current->suc->datum, d) < 0){
-      current = current->suc;
+    while(current && get_suc(current) && ptrF_cmp(get_data(get_suc(current)), d) < 0){
+      current = get_suc(current);
     }
     
     insert_after(L, d, current);
