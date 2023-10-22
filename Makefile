@@ -1,33 +1,33 @@
+BDIR = bin
 IDIR = include
 ODIR = obj
 SDIR = src
-BDIR = bin
 
 CC = gcc
 CFLAGS = -Wall -I$(IDIR) -c
 LDFLAGS = -lm
 
-PROG=$(BDIR)/mat
+PROG = $(BDIR)/reloaded
 
-_DEPS = vector.h matrix.h
+_DEPS = matrix.h
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
-_OBJS= vector.o matrix.o main.o
+_OBJS = matrix.o main.o
 OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 .PHONY : run all dirs clean delete
 
-run : all
-	./$(PROG)
+run : $(PROG)
+	./$(PROG) data/A.txt data/B.txt
 
-all : dirs $(OBJS)
-	$(CC) -o $(PROG) $(OBJS) $(LDFLAGS)
-
-$(ODIR)/%.o : $(SDIR)/%.c $(DEPS)
-	$(CC) -o $@ $< $(CFLAGS)
+$(PROG) : dirs $(OBJS)
+	$(CC) -o $(PROG) $(OBJS) $(LFLAGS)
 
 dirs :
 	@mkdir -p $(ODIR) $(BDIR)
+
+$(ODIR)/%.o : $(SDIR)/%.c $(DEPS)
+	$(CC) -o $@ $< $(CFLAGS)
 
 clean :
 	rm -rf $(ODIR) core

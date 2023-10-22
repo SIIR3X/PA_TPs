@@ -1,153 +1,144 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+
 #include "matrix.h"
 
-
-matrix_t * consMatrix(int nLig, int nCol){
-    if (nLig <= 0 || nCol <= 0) return NULL;
-
-    matrix_t* matrix = (matrix_t*)malloc(sizeof(matrix_t));
-    if (!matrix) return NULL;
-
-    matrix->values = (double*)malloc(sizeof(double) * nLig * nCol);
-    if (!matrix->values){
-        free(matrix);
-        return NULL;
-    }
-    
-    matrix->nbLig = nLig;
-    matrix->nbCol = nCol;
-
-    return matrix;
+matrix_t * consMatrix(int nbLig, int nbCol){
+  assert(nbLig > 0 && nbCol > 0);
+  matrix_t * M = calloc( 1, sizeof(matrix_t));
+  assert(M);
+  M->nbLig = nbLig;
+  M->nbCol = nbCol;
+  M->values = calloc(nbLig*nbCol, sizeof(double));
+  assert(M->values);
+  return M;
 }
 
+matrix_t * cpyMatrix(matrix_t * M){
+  assert(M);
+  matrix_t * N = consMatrix(M->nbLig,M->nbCol);
 
-matrix_t * cpyMatrix(matrix_t * M ){
-    if (M == NULL) return NULL;
-
-    matrix_t* newMatrix = (matrix_t*)malloc(sizeof(matrix_t));
-    if (!newMatrix) return NULL;
-
-    newMatrix->values = (double*)malloc(sizeof(double) * M->nbLig * M->nbCol);
-    if (!newMatrix->values){
-        free(newMatrix);
-        return NULL;
-    }
-
-    newMatrix->nbLig = M->nbLig;
-    newMatrix->nbCol = M->nbCol;
-
-    return newMatrix;
+  for(int k = 0; k < M->nbLig*M->nbCol; k += 1){
+    N->values[k] = M->values[k];
+  }
+  return N;
 }
 
-
-void freeMatrix(matrix_t ** ptrM ){
-    if (ptrM == NULL || *ptrM == NULL) return;
-
-    free((*ptrM)->values);
-    
-    free(*ptrM);
-    *ptrM = NULL;
+void freeMatrix(matrix_t ** ptrM){
+  assert(ptrM && *ptrM);
+  free((*ptrM)->values);
+  free(*ptrM);
+  *ptrM = NULL;
 }
-
-
-void printMatrix(matrix_t * M, char * entete) {
-    if (M == NULL || M->values == NULL) {
-        return;
-    }
-
-    int i, j;
-
-    printf("%s\n", entete);
-
-    for (i=0; i < M->nbLig; i++) {
-        printf(" ");
-        for (j=0; j < M->nbCol; j++) {
-            printf("%.2lf  ", M->values[i * M->nbCol + j]);
-        }
-        printf("\n");
-    }
-
-    printf("\n");
-}
-
 
 matrix_t * scanMatrix(){
-    int nbLig, nbCol, i, j;
+  int nbLig, nbCol;
+  do
+  {
+    printf("Nombres de lignes et de colonnes ? ");
+    scanf(" %d %d", &nbLig, &nbCol);
+  } while (nbLig <= 0 || nbCol <= 0);
 
-    do{
-        printf(" Nombre de lignes : ");
-        scanf("%d", &nbLig);
-
-        if (nbLig < 1 || nbLig > NBCOMPMAX){
-            printf(" %d n'est pas valide.\n", nbLig);
-        }
-    } while (nbLig < 1 || nbLig > NBCOMPMAX);
-
-    do{
-        printf( " Nombre de colonnes : ");
-        scanf("%d", &nbCol);
-
-        if (nbCol < 1 || nbCol > NBCOMPMAX){
-            printf(" %d n'est pas valide.\n", nbLig);
-        }
-    } while (nbCol < 1 || nbCol > NBCOMPMAX);
-
-    matrix_t* M = consMatrix(nbLig, nbCol);
-    if (!M) return NULL;
-
-    for(i=0; i < M->nbLig; i++){
-        for(j=0; j < M->nbCol; j++){
-            printf(" M[%d][%d] : ", i+1, j+1);
-            scanf("%lf", &M->values[i * nbCol + j]);
-        }
+  matrix_t * M = consMatrix(nbLig, nbCol);
+  for(int l=0; l<nbLig; l+=1){
+    for(int c=0; c<nbCol; c+=1){
+      printf("M[%d,%d] = ",l,c);
+      scanf(" %lf",M->values+(l*M->nbCol+c));
     }
-
-    return M;
+  }
+  return M;
 }
 
+void printMatrix(matrix_t * M, char * entete){
+  assert(M);
 
-matrix_t * addMatrix (matrix_t * A, matrix_t * B){
-    if (A == NULL || A->values == NULL) return NULL;
-    if (B == NULL || B->values == NULL) return NULL;
-    if (A->nbLig != B->nbLig || A->nbCol != B->nbCol) return NULL;
-
-    int i, j;
-
-    matrix_t* C = consMatrix(A->nbLig, A->nbCol);
-    if (!C) return NULL;
-
-    for(i=0; i < C->nbLig; i++){
-        for(j=0; j < C->nbCol; j++){
-            C->values[i * C->nbCol + j] = A->values[i * A->nbCol + j] + B->values[i * B->nbCol + j];
-        }
+  printf("%s\n", entete);
+  for(int l = 0; l < M->nbLig; l += 1){
+    printf("\t");
+    for(int c = 0; c < M->nbCol; c += 1){
+      int k = l * M->nbCol + c;
+      printf("%'.2lf\t", M->values[k]);
     }
-
-    return C;
+    printf("\n");
+  }
 }
 
+matrix_t * readMatrix(char * filename, file_mode_t mode){
+  FILE *fd;
+  int nbLig, nbCol;
+  matrix_t *M;
+  if(mode == TXT){
+    fd = fopen(filename, "rt");
+    assert(fd);
 
-matrix_t * multMatrix(matrix_t * A, matrix_t * B){
-    if (A == NULL || A->values == NULL) return NULL;
-    if (B == NULL || B->values == NULL) return NULL;
-    if (A->nbCol != B->nbLig) return NULL;
-
-    int i, j, k;
-
-    matrix_t* C = consMatrix(A->nbLig, B->nbCol);
-    if (!C) return NULL;
-
-    for(i=0; i < C->nbLig * C->nbCol; i++){
-        C->values[i] = 0.0;
+    fscanf(fd, "%d %d", &nbLig, &nbCol);
+    M = consMatrix(nbLig, nbCol);
+    for(int k = 0; k < nbLig*nbCol; k += 1){
+      fscanf(fd, "%lf", &(M->values[k]));
     }
+  }else{
+    fd = fopen(filename, "rb");
+    assert(fd);
 
-    for(i=0; i < A->nbLig; i++){
-        for(j=0; j < B->nbCol; j++){
-            for(k=0; k < A->nbCol; k++){
-                C->values[i * C->nbCol + j] += A->values[i * A->nbCol + k] * B->values[k * B->nbCol + j];
-            }
-        }
+    fread(&nbLig, sizeof(double), 1, fd);
+    fread(&nbCol, sizeof(double), 1, fd);
+    M = consMatrix(nbLig, nbCol);
+    fread(M->values, sizeof(double), M->nbLig * M->nbCol, fd);
+  }
+  fclose(fd);
+  return M;
+}
+
+void writeMatrix(matrix_t *M, char * filename, file_mode_t mode){
+  FILE *fd;
+  if(mode == TXT) {
+    fd = fopen (filename, "wt");
+    assert(fd);
+
+    fprintf (fd, "%d %d\n", M->nbLig, M->nbCol);
+    for(int k = 0; k < M->nbLig * M->nbCol; k+=1){
+      fprintf (fd, "%lf ", M->values[k]);
     }
+    fprintf (fd, "\n");
+  }else{
+    fd = fopen(filename, "wb");
+    assert(fd);
 
-    return C;
+    fwrite(&(M->nbLig), sizeof(double), 1, fd);
+    fwrite(&(M->nbCol), sizeof(double), 1, fd);
+    fwrite(M->values, sizeof(double), M->nbLig*M->nbCol, fd);
+  }
+  fclose (fd);
+}
+
+matrix_t * matrixAdd(matrix_t * A, matrix_t * B){
+  assert(A->nbLig == B->nbLig && A->nbCol == B->nbCol);
+
+  matrix_t * C = consMatrix(A->nbLig, A->nbCol);
+
+  for ( int k = 0; k < C->nbLig*C->nbCol; k += 1 ) {
+    C->values[k] = A->values[k] + B->values[k];
+  }
+  return C;
+}
+
+matrix_t * matrixMult(matrix_t * A, matrix_t * B){
+  assert(A->nbCol == B->nbLig);
+  
+  matrix_t * C = consMatrix(A->nbLig, B->nbCol);
+  int K = A->nbCol;
+
+  for(int l = 0; l < C->nbLig; l += 1){
+    for(int c = 0; c < C->nbCol; c += 1){
+      int kC = l * C->nbCol + c;
+      // C->values[kC] = 0;                CETTE INSTRUCTION EST INUTILE GRÂCE À CALLOC()
+      for(int k = 0; k < K; k += 1 ){
+        int kA = l * A->nbCol + k;
+        int kB = k * B->nbCol + c;
+        C->values[kC] += A->values[kA] * B->values[kB];
+      }
+    }
+  }
+  return C;
 }
