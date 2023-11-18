@@ -1,2 +1,3 @@
-# TP0 Programmation avancée
-TP0 de programmation avancée - Git & Gitlab
+# TP6 Programmation avancée
+
+TP6 de programmation avancée - Listes génériques doublement chaînées
